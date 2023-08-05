@@ -97,11 +97,23 @@ class ArduinoService:
 
     def set_variable(self, name: str, value):
         """Update an arduino variable."""
+        self.refresh_token()
         variable_id = self.variables.get(name)
-        payload = {"value": value}
-        response = self.api.properties_v2_update(
-            ARDUINO_THING_ID, variable_id, payload)
-        return response
+        if variable_id is not None:
+            payload = {"value": value}
+            response = self.api.properties_v2_publish(
+                ARDUINO_THING_ID, variable_id, payload)
+            return response
+
+    def turn_on_all(self):
+        """Turn on all lights."""
+        for variable in self.variables:
+            self.set_variable(variable, True)
+
+    def turn_off_all(self):
+        """Turn off all lights."""
+        for variable in self.variables:
+            self.set_variable(variable, False)
 
 
 arduinoService = ArduinoService()
@@ -110,4 +122,8 @@ arduinoService.update_variables()
 
 
 africa = arduinoService.get_variable("africaLightsStatus")
-response = arduinoService.set_variable("africaLightsStatus", True)
+t1 = time.time()
+arduinoService.turn_on_all()
+t2 = time.time()
+print("dt: ", t2 - t1)
+# print("response: ", response)
