@@ -1,0 +1,7 @@
+boto3
+ask-sdk-core
+openai
+python-dotenv
+pandas
+hermetrics
+arduino-iot-client
