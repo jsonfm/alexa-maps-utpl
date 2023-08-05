@@ -25,6 +25,8 @@ ARDUINO_THING_ID = config.get("ARDUINO_THING_ID", "")
 TOKEN_URL = "https://api2.arduino.cc/iot/v1/clients/token"
 AUDIENCE = "https://api2.arduino.cc/iot"
 
+DELAY = .2
+
 
 class ArduinoService:
     """Arduino Service."""
@@ -62,7 +64,11 @@ class ArduinoService:
 
     def refresh_token(self):
         """makes a relogin if the `access_token` has expired."""
-        if is_token_expired(self.access_token, ARDUINO_CLIENT_SECRET_KEY):
+        is_expired = is_token_expired(
+            self.access_token
+        )
+
+        if is_expired:
             self.login()
 
     def login(self):
@@ -109,11 +115,13 @@ class ArduinoService:
         """Turn on all lights."""
         for variable in self.variables:
             self.set_variable(variable, True)
+            time.sleep(DELAY)
 
     def turn_off_all(self):
         """Turn off all lights."""
         for variable in self.variables:
             self.set_variable(variable, False)
+            time.sleep(DELAY)
 
 
 arduinoService = ArduinoService()
@@ -121,9 +129,11 @@ arduinoService.login()
 arduinoService.update_variables()
 
 
-africa = arduinoService.get_variable("africaLightsStatus")
+# africa = arduinoService.get_variable("africaLightsStatus")
 t1 = time.time()
-arduinoService.turn_on_all()
+# arduinoService.set_variable("americaLightsStatus", False)
+arduinoService.turn_off_all()
+# arduinoService.refresh_token()
 t2 = time.time()
 print("dt: ", t2 - t1)
 # print("response: ", response)
