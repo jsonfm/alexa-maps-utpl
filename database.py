@@ -93,17 +93,39 @@ class Database:
             objetivos = random.choices(objetivos, k=limit)
         return objetivos
 
+    def single_query(self, comparation_key: str, comparation_value: str, retrieve_key: str):
+        try:
+            data = self.df.query(f"{comparation_key} == '{comparation_value}'")[retrieve_key].dropna().unique()
+            return list(data)
+        except:
+            return []
+
+    def get_country_related_info(self, country: str):
+        if self.df is None:
+            return {}
+        institutions = self.single_query("Paìs", country, "Institución contraparte")
+        convenios = self.single_query("Paìs", country, "Objeto del convenio")
+        careers = self.single_query("Paìs", country, "Carreras beneficiadas")
+        data = {
+            "institutions": institutions,
+            "covenios": convenios,
+            "careers": careers
+        }    
+        return data
+
 
 db = Database()
 
 
 if __name__ == '__main__':
     db.load("dbutplcampus.csv")
+
     # print("Ciudades: ", db.get_all_cities())
-    print("Paises: ", db.get_all_countries())
+    # print("Paises: ", db.get_all_countries())
     # print("Continentes: ", db.get_all_continents())
     # print("Institutions: ", db.get_institutions(randomized=True))
     # print("careers: ", db.get_careers())
     # print("convenios: ", db.get_convenios())
     # print("objetivos: ", db.get_objetivos())
-    ...
+    info = db.get_country_related_info("Perú")
+    print("info: ", info)

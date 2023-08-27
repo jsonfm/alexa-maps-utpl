@@ -30,7 +30,7 @@ ARDUINO_THING_ID = config.get("ARDUINO_THING_ID", "")
 TOKEN_URL = "https://api2.arduino.cc/iot/v1/clients/token"
 AUDIENCE = "https://api2.arduino.cc/iot"
 
-DELAY = .25
+DELAY = .25 # delay time between continuos requests
 
 
 
