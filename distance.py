@@ -6,7 +6,7 @@ lev = Levenshtein()
 
 
 UTPL_CASES = ["u.t.p.l", "u. t. p. l.", "UTPL",
-              "U. T. P. L.", "utpl", "o. t. p. l."]
+              "U. T. P. L.", "utpl", "o. t. p. l.", "t. p. l.", "p. l."]
 
 
 def utpl_string_cases(word: str, cases: List = UTPL_CASES):

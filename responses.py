@@ -1,3 +1,5 @@
+import logging
+
 from questions import fix_slot
 from chatgpt import ask_to_chatgpt_v2
 from distance import utpl_string_cases_on_phrase
@@ -10,16 +12,18 @@ from answers import (
     get_objetivos_answer
 )
 
+from arduino import arduinoService
 
-def ps(string):
-    """String parsers"""
-    string.lower()
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def smart_response(slots):
     response = "No estoy preparada para responder a esa pregunta."
     what_question = slots["whatQuestion"].value or ""
     how_question = slots["howQuestion"].value or ""
+    lights_word = slots["lights"].value or ""
 
     try:
         is_utpl = utpl_string_cases_on_phrase(what_question) or utpl_string_cases_on_phrase(
@@ -29,6 +33,9 @@ def smart_response(slots):
         is_countries = "países" in what_question or "países" in how_question
         is_careers = "carreras" in what_question or "carreras" in how_question
         is_objetivos = "objetivos" in what_question or "objetivos" in how_question
+
+        is_light = "enciende" in lights_word
+        is_dark = "apaga" in lights_word
 
         if is_utpl:
             if is_cities:
@@ -54,6 +61,15 @@ def smart_response(slots):
             if how_question is not None:
                 response = fix_slot(how_question, "cómo")
                 response = ask_to_chatgpt_v2(response, max_tokens=100)
+
+            if is_light:
+                arduinoService.turn_on_all()
+                response = "¡Luces encendidas!"
+
+            if is_dark:
+                arduinoService.turn_off_all()
+                response = "¡Luces apagadas!"
+
     except Exception as e:
-        pass
+        logger.warn(f"error {str(e)}")
     return response

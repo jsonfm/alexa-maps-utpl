@@ -19,14 +19,32 @@ from tokens import is_token_expired
 from config import config
 
 
+# 
+from enum import Enum
+
+
+
 ARDUINO_CLIENT_ID = config.get("ARDUINO_CLIENT_ID", "")
 ARDUINO_CLIENT_SECRET_KEY = config.get("ARDUINO_CLIENT_SECRET_KEY", "")
 ARDUINO_THING_ID = config.get("ARDUINO_THING_ID", "")
 TOKEN_URL = "https://api2.arduino.cc/iot/v1/clients/token"
 AUDIENCE = "https://api2.arduino.cc/iot"
 
-DELAY = .2
+DELAY = .25
 
+
+
+class ArduinoPins(str, Enum):
+    """Pins on the Arduino Device.
+    Example:
+    america = ArduinoPins.AMERICA.value
+    """
+    AFRICA = "africaLightsStatus"
+    AMERICA = "americaLightsStatus"
+    ASIA = "asiaLightsStatus"
+    EUROPE = "europaLightsStatus"
+    OCEANIA = "oceaniaLightsStatus"
+    ANTARCTICA = "antartidaLightsStatus"
 
 class ArduinoService:
     """Arduino Service."""
@@ -89,6 +107,11 @@ class ArduinoService:
         self.refresh_token()
         response = self.api.properties_v2_list(ARDUINO_THING_ID)
         return response
+    
+    def get_variables(self):
+        """Returns available variables."""
+        self.update_variables()
+        return self.variables
 
     def get_property(self, pid: str):
         """Returns an specific property."""
@@ -114,26 +137,25 @@ class ArduinoService:
     def turn_on_all(self):
         """Turn on all lights."""
         for variable in self.variables:
-            self.set_variable(variable, True)
+            self.set_variable(variable, False)
             time.sleep(DELAY)
 
     def turn_off_all(self):
         """Turn off all lights."""
         for variable in self.variables:
-            self.set_variable(variable, False)
+            self.set_variable(variable, True)
             time.sleep(DELAY)
 
 
 arduinoService = ArduinoService()
-arduinoService.login()
-arduinoService.update_variables()
 
 
-# africa = arduinoService.get_variable("africaLightsStatus")
-t1 = time.time()
-# arduinoService.set_variable("americaLightsStatus", False)
-arduinoService.turn_off_all()
-# arduinoService.refresh_token()
-t2 = time.time()
-print("dt: ", t2 - t1)
-# print("response: ", response)
+if __name__ == "__main__":
+
+    # arduinoService.login()
+    # arduinoService.update_variables()
+
+    # arduinoService.turn_off_all()
+    # variables = arduinoService.get_variables()
+    # arduinoService.set_variable_with_name_in("africa", True)
+    ...

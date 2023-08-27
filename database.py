@@ -98,9 +98,9 @@ db = Database()
 
 
 if __name__ == '__main__':
-    # db.load("dbutplcampus.csv")
+    db.load("dbutplcampus.csv")
     # print("Ciudades: ", db.get_all_cities())
-    # print("Paises: ", db.get_all_countries())
+    print("Paises: ", db.get_all_countries())
     # print("Continentes: ", db.get_all_continents())
     # print("Institutions: ", db.get_institutions(randomized=True))
     # print("careers: ", db.get_careers())
