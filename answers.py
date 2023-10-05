@@ -61,6 +61,13 @@ def get_objetivos_answer(randomized: bool = True, limit: int = 2):
     return answer
 
 
+def get_convenios_by_country(country: str, limit: int = 3):
+    convenios = db.single_query("Paìs", country, "Objeto del convenio", limit=limit)
+    convenios_string = stringify(convenios)
+    answer = f"Los tipos de convenios que hemos establecido en {country} son: "
+    answer += convenios_string
+    return answer
+
 if __name__ == "__main__":
     # answer = get_cities_answer()
     # answer = get_countries_answer()
@@ -69,4 +76,5 @@ if __name__ == "__main__":
     # answer = get_convenios_answer()
     # answer = get_objetivos_answer(randomized=True, limit=2)
     # print("answer: ", answer)
+    print("country chile: ", get_convenios_by_country("Chile"))
     ...

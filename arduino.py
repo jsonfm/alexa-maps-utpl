@@ -1,27 +1,21 @@
 import time
 
-# Oauth2
-
-from oauthlib.oauth2 import BackendApplicationClient
-from requests_oauthlib import OAuth2Session
-
+#
+from enum import Enum
 
 # Arduino
 import iot_api_client as iot
 from iot_api_client.configuration import Configuration
-
-
-# Tokens
-from tokens import is_token_expired
-
+from oauthlib.oauth2 import BackendApplicationClient
+from requests_oauthlib import OAuth2Session
 
 #
 from config import config
 
+# Tokens
+from tokens import is_token_expired
 
-# 
-from enum import Enum
-
+# Oauth2
 
 
 ARDUINO_CLIENT_ID = config.get("ARDUINO_CLIENT_ID", "")
@@ -30,8 +24,7 @@ ARDUINO_THING_ID = config.get("ARDUINO_THING_ID", "")
 TOKEN_URL = "https://api2.arduino.cc/iot/v1/clients/token"
 AUDIENCE = "https://api2.arduino.cc/iot"
 
-DELAY = .25 # delay time between continuos requests
-
+DELAY = 0.25  # delay time between continuos requests
 
 
 class ArduinoPins(str, Enum):
@@ -39,6 +32,7 @@ class ArduinoPins(str, Enum):
     Example:
     america = ArduinoPins.AMERICA.value
     """
+
     AFRICA = "africaLightsStatus"
     AMERICA = "americaLightsStatus"
     ASIA = "asiaLightsStatus"
@@ -46,14 +40,13 @@ class ArduinoPins(str, Enum):
     OCEANIA = "oceaniaLightsStatus"
     ANTARCTICA = "antartidaLightsStatus"
 
+
 class ArduinoService:
     """Arduino Service."""
 
     def __init__(self):
         # Oauth2
-        self.oauth_client = BackendApplicationClient(
-            client_id=ARDUINO_CLIENT_ID
-        )
+        self.oauth_client = BackendApplicationClient(client_id=ARDUINO_CLIENT_ID)
         self.oauth = OAuth2Session(client=self.oauth_client)
 
         # Session
@@ -82,9 +75,7 @@ class ArduinoService:
 
     def refresh_token(self):
         """makes a relogin if the `access_token` has expired."""
-        is_expired = is_token_expired(
-            self.access_token
-        )
+        is_expired = is_token_expired(self.access_token)
 
         if is_expired:
             self.login()
@@ -107,7 +98,7 @@ class ArduinoService:
         self.refresh_token()
         response = self.api.properties_v2_list(ARDUINO_THING_ID)
         return response
-    
+
     def get_variables(self):
         """Returns available variables."""
         self.update_variables()
@@ -131,7 +122,8 @@ class ArduinoService:
         if variable_id is not None:
             payload = {"value": value}
             response = self.api.properties_v2_publish(
-                ARDUINO_THING_ID, variable_id, payload)
+                ARDUINO_THING_ID, variable_id, payload
+            )
             return response
 
     def turn_on_all(self):
@@ -146,16 +138,30 @@ class ArduinoService:
             self.set_variable(variable, True)
             time.sleep(DELAY)
 
+    def set_variable_by_continent(self, continent: str, value: bool = True):
+        """Sets a new value given a continent."""
+        if continent.lower() in "america":
+            self.set_variable(ArduinoPins.AMERICA.value, value)
+        if continent.lower() in "europe":
+            self.set_variable(ArduinoPins.EUROPE.value, value)
+        if continent.lower() in "africa":
+            self.set_variable(ArduinoPins.AFRICA.value, value)
+        if continent.lower() in "asia":
+            self.set_variable(ArduinoPins.ASIA.value, value)
+        if continent.lower() in "oceania":
+            self.set_variable(ArduinoPins.OCEANIA.value, value)
+
 
 arduinoService = ArduinoService()
 
 
 if __name__ == "__main__":
-
-    # arduinoService.login()
-    # arduinoService.update_variables()
+    arduinoService.login()
+    arduinoService.update_variables()
 
     # arduinoService.turn_off_all()
     # variables = arduinoService.get_variables()
     # arduinoService.set_variable_with_name_in("africa", True)
-    ...
+    # arduinoService.set_variable_by_continent("america", True)
+
+    pass

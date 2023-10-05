@@ -1,6 +1,7 @@
 from typing import List
 import pandas as pd
 import random
+from unidecode import unidecode
 
 
 def exclude_strings_on_list(input: List = [], exclude: List = []):
@@ -12,6 +13,29 @@ def exclude_strings_on_list(input: List = [], exclude: List = []):
         if not is_included:
             results.append(item)
     return results
+
+
+def string_in_list(string: str, list_of_strings: List[str]):
+    """Checks if a string exists on a list."""
+    for item in list_of_strings:
+        if unidecode(string.lower()) in unidecode(item.lower()):
+            return True
+    return False
+
+
+def extract_query_key_from_string(string: str, possible_keys: List[str]):
+    """returns a key contained by a string."""
+    for key in possible_keys:
+        if unidecode(key.lower()) in unidecode(string.lower()):
+            return key
+    return None
+
+
+def extract_query_key_and_value(string: str, possible_keys: list, possible_values: list):
+    """Extract question keys and values."""
+    key = extract_query_key_from_string(string, possible_keys)
+    value = extract_query_key_from_string(string, possible_values)
+    return key, value
 
 
 class Database:
@@ -93,10 +117,15 @@ class Database:
             objetivos = random.choices(objetivos, k=limit)
         return objetivos
 
-    def single_query(self, comparation_key: str, comparation_value: str, retrieve_key: str):
+    def single_query(self, comparation_key: str, comparation_value: str, retrieve_key: str, limit: int = 5):
         try:
+            # self.df[retrieve_key] = self.df[retrieve_key].str.lower()
+            # print("key: ", self.df[retrieve_key])
             data = self.df.query(f"{comparation_key} == '{comparation_value}'")[retrieve_key].dropna().unique()
-            return list(data)
+            data = list(data)
+            if limit > 0 and limit < len(data):
+                data = data[:limit]
+            return data
         except:
             return []
 
@@ -113,19 +142,45 @@ class Database:
         }    
         return data
 
+    def parse_continent(self, continent: list):
+        continents = {
+            "Americano": "america",
+            "Europa": "europe"
+        }
+        if len(continent) > 0:
+            continent = continents.get(continent[0], "")
+            return continent
+        else:
+            return ""
+
+    def get_continent_of_city(self, value: str):
+        continent = self.single_query("Ciudad", value, "Continente")
+        continent = self.parse_continent(continent)
+        return continent
+
+    def get_continent_of_country(self, value: str):
+        continent = self.single_query("Paìs", value, "Continente")
+        continent = self.parse_continent(continent)
+        return continent
+
 
 db = Database()
 
 
 if __name__ == '__main__':
     db.load("dbutplcampus.csv")
-
     # print("Ciudades: ", db.get_all_cities())
-    # print("Paises: ", db.get_all_countries())
-    # print("Continentes: ", db.get_all_continents())
+    print("Paises: ", db.get_all_countries())
+    print("Continentes: ", db.get_all_continents())
+    print("Continent: ", db.get_continent_of_country("Italia"))
+    print("Continent city: ", db.get_continent_of_city("Lima"))
     # print("Institutions: ", db.get_institutions(randomized=True))
     # print("careers: ", db.get_careers())
     # print("convenios: ", db.get_convenios())
     # print("objetivos: ", db.get_objetivos())
-    info = db.get_country_related_info("Perú")
-    print("info: ", info)
+    # info = db.get_country_related_info("Perú")
+    # print("info: ", info)
+    # is_chile = string_in_list("Perú", db.get_all_countries())
+    # print("is chile: ", is_chile)
+    # key = extract_query_key_from_string("qué convenios tiene utpl", ["convenios", "carreras"])
+    # print("key: ", key)

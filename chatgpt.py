@@ -81,8 +81,10 @@ def sort_countries_by_continent(countries: list, to_json: bool = True):
 if __name__ == "__main__":
     import time
     start = time.time()
-    query = "What's astrophysics? Give me a short response."
-    response = ask_to_chatgpt(query, max_tokens=500, fixed=False)
+    # query = "What's astrophysics? Give me a short response."
+    # response = ask_to_chatgpt(query, max_tokens=500, fixed=False)
+    countries = ['Perú', 'Italia', 'Argentina', 'Brasil', 'Portugal', 'México', 'Chile', 'España', 'Estados Unidos', 'Alemania', 'Canadá', 'Rumania', 'Colombia', 'Honduras']
+    response = sort_countries_by_continent(countries, to_json=False)
     end = time.time()
     print("response: ", response)
     print(f"elapsed time: {end - start} secs.")
