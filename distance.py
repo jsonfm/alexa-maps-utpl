@@ -1,6 +1,10 @@
 from typing import List
 
+import numpy as np
 from hermetrics.levenshtein import Levenshtein
+from unidecode import unidecode
+
+from database import dbv2
 
 lev = Levenshtein()
 
@@ -39,14 +43,29 @@ def utpl_string_cases_on_phrase(phrase: str = ""):
     return is_utpl_on_phrase
 
 
-if __name__ == "__main__":
-    question = "¿Cuáles son las fechas de postulación para intercambios?"
-    user_message = "en qué fechas puedo postular a los intercambios"
-    similarity = lev.similarity(question.lower(), user_message.lower())
+def find_similar_question_on_list(text: str, questions: list[str]):
+    clean = lambda text: unidecode(text.lower().rstrip())
+    distances = [
+        lev.normalized_distance(clean(text), clean(question)) for question in questions
+    ]
+    distances = np.array(distances)
+    question_index = np.argmin(distances)
+    question = questions[question_index]
+    return question
 
-    if similarity > 0.3:
-        answer = """Fechas de postulación si eres estudiante de la UTPL
- • Del 15 de enero al 15 de marzo 
- • Del 15 de agosto al 15 de noviembre"""
-        print("--> answer: ", answer)
-    # print("result: ", result)
+
+def find_similar_question(text: str):
+    question = find_similar_question_on_list(text, list(dbv2.questions.keys()))
+    answer = dbv2.questions[question]
+    return question, answer
+
+
+if __name__ == "__main__":
+    import time
+
+    t0 = time.time()
+    question, answer = find_similar_question("certificado inglés")
+    t1 = time.time()
+    print("--> question: ", question)
+    print("--> answer: ", answer)
+    print("dt: ", t1 - t0)
